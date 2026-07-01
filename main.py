@@ -17,6 +17,7 @@ caminho_download = "C:\\rpaIndea\\download"
 def configurar_options():
     """Gera um objeto de options limpo a cada iteração para evitar bugs"""
     options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--mute-audio')
     options.add_argument("--disable-dev-shm-usage")
