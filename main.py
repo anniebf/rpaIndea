@@ -22,7 +22,6 @@ def configurar_options():
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     
-    # Configurações de download fixadas aqui
     options.add_experimental_option("prefs", {
         "download.default_directory": caminho_download,
         "download.prompt_for_download": False,
@@ -45,7 +44,7 @@ def main():
         municipio = row['Municipio']
 
         try:
-            options = configurar_options() # Instancia as opções limpas
+            options = configurar_options() 
 
             print(fr"Iniciando o Selenium para o usuário: {row['Login']}...")
             driver = webdriver.Chrome(options=options)
@@ -59,12 +58,13 @@ def main():
             sleep(2) 
             
             if login_realizado:
-                # Se o erro persistir, o crash está acontecendo exatamente dentro desta função:
+            
                 arquivo_atual = menu_relatorio(driver, WebDriverWait, EC, By, sleep, caminho_download)
                 if arquivo_atual:
                     print(fr"Iniciando o processamento do arquivo: {arquivo_atual}")
                     caminho_arquivo = os.path.join(caminho_download, arquivo_atual)
                     processar_arquivo(login_usuario,caminho_arquivo)
+                    os.remove(fr"{caminho_arquivo}")
 
             print(fr"Login do usuário {row['Login']} processado com sucesso.")
     
