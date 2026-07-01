@@ -40,24 +40,25 @@ def retorDescfa(nfcod):
     cursor.close()
     return b1_cod
 
-def inserirDadosBovideos(cnpj: str, sexo: str, faixet: str, quant: int):
+def inserirDadosBovideos(cnpj: str, sexo: str, faixet: str, quant: int,logging):
     try:
 
         connectionBd = oracledb.connect(user=usernameBd, password=passwordBd, dsn=dsn)
         cursor = connectionBd.cursor()
             
         nfcod = retornNFcod(cnpj)
-        print(f"------ nfcod: {nfcod} ------")
+        #print(f"------ nfcod: {nfcod} ------")
         descfa = retorDescfa(faixet)
-        print(f"------descfa: {descfa} ------")
+        #print(f"------descfa: {descfa} ------")
             
         sql = fr"""INSERT INTO RPA.saldo_animais_indea (data, codfaz, faixet, descfa, sexo, quant) VALUES (SYSDATE,'{nfcod}', '{faixet}', '{descfa}', '{sexo}', {quant})"""
-        print(nfcod, faixet, descfa, sexo, quant)
+        #print(nfcod, faixet, descfa, sexo, quant)
         cursor.execute(sql)
         connectionBd.commit()
+        logging.info(f"Dados inseridos no banco com sucesso")
 
         cursor.close()
     except Exception as e:
         
-        print(f"Erro ao inserir dados no banco: {e}")
-        print(nfcod, faixet, descfa, sexo, quant)
+        logging.error(f"Erro ao inserir dados no banco: {e}")
+        #print(nfcod, faixet, descfa, sexo, quant)

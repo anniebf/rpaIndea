@@ -4,17 +4,17 @@ from time import time
 import time    
 from tabelaBovideos import tabela_bovideos
 
-def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
+def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download,logging):
     arquivo_atual = None 
     try:
-        print("Acessando menu de relatórios...")
+        logging.info("Acessando menu de relatórios...")
         driver.switch_to.default_content()
-        print("Entrando no iframe: mainsystem")
+        logging.info("Entrando no iframe: mainsystem")
         WebDriverWait(driver, 25).until(
             EC.frame_to_be_available_and_switch_to_it((By.NAME, "mainsystem"))
         )
 
-        print("Entrando no iframe: mainform")
+        logging.info("Entrando no iframe: mainform")
         WebDriverWait(driver, 25).until(
             EC.frame_to_be_available_and_switch_to_it((By.NAME, "mainform"))
         )
@@ -41,20 +41,20 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
         )
         
         # 3. Entra no novo iframe do pop-up (ID 793) que apareceu após o clique
-        print("Entrando no iframe da janela flutuante (formID=793)")
+        logging.info("Entrando no iframe da janela flutuante (formID=793)")
         WebDriverWait(driver, 25).until(
             EC.frame_to_be_available_and_switch_to_it((By.XPATH, "//iframe[contains(@src, 'formID=793')]"))
         )
         
         # 4. Entra no mainform interno desta nova janela
-        print("Entrando no novo iframe: mainform (interno do relatório)")
+        logging.info("Entrando no novo iframe: mainform (interno do relatório)")
         WebDriverWait(driver, 25).until(
             EC.frame_to_be_available_and_switch_to_it((By.NAME, "mainform"))
         )
 
         # =======================================================================
         # =======================================================================
-        print("Aguardando a lista 'lookupInput' carregar na nova tela...")
+        logging.info("Aguardando a lista 'lookupInput' carregar na nova tela...")
         bt_exploracao = WebDriverWait(driver, 25).until(
             EC.visibility_of_element_located((By.XPATH, "/html/body/form/div/div/div/div[3]/div/button"))
         )
@@ -67,8 +67,8 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
     
         opcoes_exploracao = lista_exploracao.find_elements(By.TAG_NAME, "li")
         
-        print(f"Total de itens encontrados: {len(opcoes_exploracao)}")
-        print("--- LISTA DE OPÇÕES ---")
+        logging.info(f"Total de itens encontrados: {len(opcoes_exploracao)}")
+        logging.info("--- LISTA DE OPÇÕES ---")
         
         for opcao_exp in opcoes_exploracao:
             texto = opcao_exp.text.strip()
@@ -76,12 +76,13 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
             if texto:
                 texto_maiusculo = texto.upper()
                 if ("ATIVO" in texto_maiusculo or "ATIVA" in texto_maiusculo) and "INATIV" not in texto_maiusculo:
-                    print(f"Opção encontrada: {texto}")
+                    logging.info(f"Opção encontrada: {texto}")
                     opcao_exp.click()
                     break  
             else:
-                print("Nenhuma opção encontrada na lista de exploração.")
                 continue
+        else:
+            logging.warning("Nenhuma opção correspondente encontrada na lista de exploração.")
 
 
         sleep(5)
@@ -100,8 +101,8 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
 
         opcoes_lista = lista_especies.find_elements(By.TAG_NAME, "li")
         
-        print(f"Total de itens encontrados: {len(opcoes_lista)}")
-        print("--- LISTA DE OPÇÕES ---")
+        logging.info(f"Total de itens encontrados: {len(opcoes_lista)}")
+        logging.info("--- LISTA DE OPÇÕES ---")
         
         for opcao in opcoes_lista:
             texto = opcao.text.strip()
@@ -109,7 +110,7 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
             if texto:
                 texto_maiusculo = texto.upper()
                 if "BOVÍDEOS" in texto_maiusculo:
-                    print(f"Opção encontrada: {texto}")
+                    logging.info(f"Opção encontrada: {texto}")
                     opcao.click()
                     break  # Sai do loop após selecionar a opção desejada
         sleep(5)
@@ -119,6 +120,7 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
             EC.visibility_of_element_located((By.XPATH, "/html/body/form/div/div/div/div[6]/button"))
         )
         bt_imprimir.click()
+        logging.info("Botão de impressão clicado, aguardando o download do arquivo...")
         sleep(10)
         try:
             segundos = 0
@@ -128,17 +130,17 @@ def menu_relatorio(driver, WebDriverWait, EC, By, sleep,caminho_download):
                 segundos += 1
 
             if len(os.listdir(caminho_download)) > quant_arq:
-                print("O arquivo foi baixado")
+                logging.info("O arquivo foi baixado")
                 
-                arquivo_atual = tabela_bovideos(caminho_download)
+                arquivo_atual = tabela_bovideos(caminho_download,logging)
             else:
-                print("Erro: O tempo limite estourou e o arquivo não apareceu.")
+                logging.warning("Erro: O tempo limite estourou e o arquivo não apareceu.")
         except:
-            print("Finalizado com ERRO")
+            logging.error("Finalizado com ERRO")
     
     
     except Exception as e:
-        print(fr"Erro: {e}")
+        logging.error(fr"Erro: {e}")
     
     return arquivo_atual
 

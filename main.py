@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import pandas as pd
 from selenium import webdriver
@@ -8,6 +9,23 @@ from trio import sleep
 from menuLateral import menu_relatorio
 from login import login_indea
 from tabelaBovideos import processar_arquivo
+import logging
+from time import sleep
+import warnings
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    handlers=[
+        logging.FileHandler(fr"log/{datetime.now().strftime('%d-%m-%Y')}_relatorio_animais_indea.log", encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
+logging.captureWarnings(True)
+#avisos capturados só aparecem se forem erros graves
+logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
 caminho_planilha = 'C:\\rpaIndea\\senhas\\Senhas-INDEA.xlsx'
 tabela_indea = pd.read_excel(caminho_planilha)
@@ -35,7 +53,8 @@ def configurar_options():
     return options
 
 def main():
-    print("----------------INICIANDO----------------")    
+    logging.info("----------------INICIANDO----------------")
+    #print("----------------INICIANDO----------------")    
     for index, row in df.iterrows():
         driver = None
         
@@ -47,7 +66,7 @@ def main():
         try:
             options = configurar_options() 
 
-            print(fr"Iniciando o Selenium para o usuário: {row['Login']}...")
+            logging.info(fr"Iniciando o Selenium para o usuário: {row['Login']}...")
             driver = webdriver.Chrome(options=options)
             url = "https://sistemas.indea.mt.gov.br/PRD/open.do?action=open&sys=PRD"
             driver.implicitly_wait(2)
@@ -55,32 +74,34 @@ def main():
             driver.get(url)
             driver.maximize_window()
 
-            login_realizado = login_indea(login_usuario, senha_usuario, driver, row, WebDriverWait, EC, By, sleep)
+            login_realizado = login_indea(login_usuario, senha_usuario, driver, row, WebDriverWait, EC, By, sleep,logging)
             sleep(2) 
             
             if login_realizado:
             
-                arquivo_atual = menu_relatorio(driver, WebDriverWait, EC, By, sleep, caminho_download)
+                arquivo_atual = menu_relatorio(driver, WebDriverWait, EC, By, sleep, caminho_download,logging)
                 if arquivo_atual:
-                    print(fr"Iniciando o processamento do arquivo: {arquivo_atual}")
+                    logging.info(fr"Iniciando o processamento do arquivo: {arquivo_atual}")
                     caminho_arquivo = os.path.join(caminho_download, arquivo_atual)
-                    processar_arquivo(login_usuario,caminho_arquivo)
+                    processar_arquivo(login_usuario,caminho_arquivo,logging)
+                    logging.info(fr"Processamento do arquivo {arquivo_atual} concluído com sucesso.")
                     os.remove(fr"{caminho_arquivo}")
+                    logging.info(fr"Arquivo {arquivo_atual} removido com sucesso.")
 
-            print(fr"Login do usuário {row['Login']} processado com sucesso.")
+            logging.info(fr"Login do usuário {row['Login']} processado com sucesso.")
     
         except Exception as e:
-            print(fr"Erro durante a execução do usuário {row['Login']}: {e}")
+            logging.error(fr"Erro durante a execução do usuário {row['Login']}: {e}")
             
         finally:
             if driver:
                 try:
                     driver.quit()
-                    print("Navegador encerrado corretamente.")
+                    logging.info("Navegador encerrado corretamente.")
                 except Exception:
                     pass 
-    print("Todos os Cpnjs foram processados")
-    print("----------------FINALIZANDO----------------")
+    logging.info("Todos os Cpnjs foram processados")
+    logging.info("----------------FINALIZANDO----------------")
 
 if __name__ == "__main__": 
     main()
