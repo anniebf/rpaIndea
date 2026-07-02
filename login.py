@@ -39,7 +39,7 @@ def login_indea(login_usuario,senha_usuario, driver, row, WebDriverWait, EC, By,
             
             WebDriverWait(driver, 5).until(
                 EC.visibility_of_element_located(
-                    (By.XPATH, "//*[contains(text(),'Acesso')]")
+                    (By.XPATH, "//*[contains(., 'Erro') or contains(., 'Acesso')]")
                 )
             )
             logging.info(fr"Verificando se o login é válido para o usuário: {row['Login']}...")
