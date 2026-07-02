@@ -13,6 +13,8 @@ import logging
 from time import sleep
 import warnings
 
+from emailErro import enviar_warning
+
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 logging.basicConfig(
@@ -35,7 +37,7 @@ caminho_download = "C:\\rpaIndea\\download"
 def configurar_options():
     """Gera um objeto de options limpo a cada iteração para evitar bugs"""
     options = webdriver.ChromeOptions()
-    #options.add_argument('--headless')
+    options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--mute-audio')
     options.add_argument("--disable-dev-shm-usage")
@@ -74,7 +76,7 @@ def main():
             driver.get(url)
             driver.maximize_window()
 
-            login_realizado = login_indea(login_usuario, senha_usuario, driver, row, WebDriverWait, EC, By, sleep,logging)
+            login_realizado = login_indea(aglomerado, login_usuario, senha_usuario, driver, row, WebDriverWait, EC, By, sleep,logging)
             sleep(2) 
             
             if login_realizado:
@@ -100,6 +102,7 @@ def main():
                     logging.info("Navegador encerrado corretamente.")
                 except Exception:
                     pass 
+    enviar_warning()
     logging.info("Todos os Cpnjs foram processados")
     logging.info("----------------FINALIZANDO----------------")
 

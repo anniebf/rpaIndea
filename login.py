@@ -1,9 +1,9 @@
 import logging
 
 from trio import sleep
+from emailErro import armazenar_valor
 
-
-def login_indea(login_usuario,senha_usuario, driver, row, WebDriverWait, EC, By, sleep,logging):
+def login_indea(aglomerado,login_usuario,senha_usuario, driver, row, WebDriverWait, EC, By, sleep,logging):
 
     #
     # LOGIN NO INDEA
@@ -37,14 +37,21 @@ def login_indea(login_usuario,senha_usuario, driver, row, WebDriverWait, EC, By,
 
         try:
             
-            WebDriverWait(driver, 5).until(
+            erro = WebDriverWait(driver, 5).until(
                 EC.visibility_of_element_located(
                     (By.XPATH, "//*[contains(., 'Erro') or contains(., 'Acesso')]")
                 )
             )
             logging.info(fr"Verificando se o login é válido para o usuário: {row['Login']}...")
             #print("Login inválido")
+            texto_alerta = erro.text
+            linhas = texto_alerta.split("\n")
 
+            # 2. Agora sim, pega a penúltima LINHA da lista
+            erro_limpo = linhas[-2]
+
+            armazenar_valor(aglomerado, erro_limpo)
+            
             login_realizado = False
 
         except:
