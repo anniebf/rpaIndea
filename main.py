@@ -5,43 +5,47 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from trio import sleep
+import warnings
+import logging
+from time import sleep  
+
 from menuLateral import menu_relatorio
 from login import login_indea
 from tabelaBovideos import processar_arquivo
-import logging
-from time import sleep
-import warnings
 from emailErro import enviar_warning
 
-caminho_padrao = fr"C:\rpaIndea"
+caminho_padrao = r"C:\rpaIndea"
 pastas = ["senhas", "download", "log"]
 
 for pasta in pastas:
-    if pasta not in os.listdir(caminho_padrao):
-        logging.info(f"Criando diretório: {pasta}")
-        pasta_dir = os.path.join(caminho_padrao, pasta)
+    pasta_dir = os.path.join(caminho_padrao, pasta)
+    
+    # os.path.exists checa o caminho completo de forma segura
+    if not os.path.exists(pasta_dir):
+        print(f"Criando diretório físico: {pasta_dir}")
         os.makedirs(pasta_dir, exist_ok=True)
     else:
-        logging.info(f"Diretório já existe: {pasta}")
-        pasta_dir = os.path.join(caminho_padrao, pasta)
+        print(f"Diretório já existe no sistema: {pasta_dir}")
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
+
+nome_log = f"{datetime.now().strftime('%d-%m-%Y')}_relatorio_animais_indea.log"
+caminho_completo_log = os.path.join(caminho_padrao, "log", nome_log)
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(message)s',
     handlers=[
-        logging.FileHandler(fr"log/{datetime.now().strftime('%d-%m-%Y')}_relatorio_animais_indea.log", encoding='utf-8'),
+        logging.FileHandler(caminho_completo_log, encoding='utf-8'),
         logging.StreamHandler()
     ]
 )
 logging.captureWarnings(True)
-#avisos capturados só aparecem se forem erros graves
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
+logging.info("--- SISTEMA DE LOGS INICIALIZADO COM SUCESSO ---")
         
-caminho_planilha = os.path.join(caminho_padrao, 'senhas/Senhas-INDEA.xlsx')
+caminho_planilha = os.path.join(caminho_padrao, 'senhas', 'Senhas-INDEA.xlsx')
 tabela_indea = pd.read_excel(caminho_planilha)
 df = pd.DataFrame(tabela_indea)
 caminho_download = os.path.join(caminho_padrao, "download")
@@ -114,7 +118,7 @@ def main():
                     logging.info("Navegador encerrado corretamente.")
                 except Exception:
                     pass 
-    enviar_warning()
+    enviar_warning(logging)
     logging.info("Todos os Cpnjs foram processados")
     logging.info("----------------FINALIZANDO----------------")
 
