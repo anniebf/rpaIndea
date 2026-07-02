@@ -12,8 +12,19 @@ from tabelaBovideos import processar_arquivo
 import logging
 from time import sleep
 import warnings
-
 from emailErro import enviar_warning
+
+caminho_padrao = fr"C:\rpaIndea"
+pastas = ["senhas", "download", "log"]
+
+for pasta in pastas:
+    if pasta not in os.listdir(caminho_padrao):
+        logging.info(f"Criando diretório: {pasta}")
+        pasta_dir = os.path.join(caminho_padrao, pasta)
+        os.makedirs(pasta_dir, exist_ok=True)
+    else:
+        logging.info(f"Diretório já existe: {pasta}")
+        pasta_dir = os.path.join(caminho_padrao, pasta)
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -29,18 +40,6 @@ logging.captureWarnings(True)
 #avisos capturados só aparecem se forem erros graves
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
-
-caminho_padrao = fr"C:\rpaIndea"
-pastas = ["senhas", "download", "log"]
-
-for pasta in pastas:
-    if pasta not in os.listdir(caminho_padrao):
-        logging.info(f"Criando diretório: {pasta}")
-        pasta_dir = os.path.join(caminho_padrao, pasta)
-        os.makedirs(pasta_dir, exist_ok=True)
-    else:
-        logging.info(f"Diretório já existe: {pasta}")
-        pasta_dir = os.path.join(caminho_padrao, pasta)
         
 caminho_planilha = os.path.join(caminho_padrao, 'senhas/Senhas-INDEA.xlsx')
 tabela_indea = pd.read_excel(caminho_planilha)
