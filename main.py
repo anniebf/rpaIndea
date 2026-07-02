@@ -29,10 +29,23 @@ logging.captureWarnings(True)
 #avisos capturados só aparecem se forem erros graves
 logging.getLogger("py.warnings").setLevel(logging.ERROR)
 
-caminho_planilha = 'C:\\rpaIndea\\senhas\\Senhas-INDEA.xlsx'
+
+caminho_padrao = fr"C:\rpaIndea"
+pastas = ["senhas", "download", "log"]
+
+for pasta in pastas:
+    if pasta not in os.listdir(caminho_padrao):
+        logging.info(f"Criando diretório: {pasta}")
+        pasta_dir = os.path.join(caminho_padrao, pasta)
+        os.makedirs(pasta_dir, exist_ok=True)
+    else:
+        logging.info(f"Diretório já existe: {pasta}")
+        pasta_dir = os.path.join(caminho_padrao, pasta)
+        
+caminho_planilha = os.path.join(caminho_padrao, 'senhas/Senhas-INDEA.xlsx')
 tabela_indea = pd.read_excel(caminho_planilha)
 df = pd.DataFrame(tabela_indea)
-caminho_download = "C:\\rpaIndea\\download"
+caminho_download = os.path.join(caminho_padrao, "download")
 
 def configurar_options():
     """Gera um objeto de options limpo a cada iteração para evitar bugs"""
@@ -44,7 +57,7 @@ def configurar_options():
     options.add_argument("--disable-gpu")
     
     options.add_experimental_option("prefs", {
-        "download.default_directory": caminho_download,
+        "download.default_directory": os.path.join(caminho_padrao, caminho_download),
         "download.prompt_for_download": False,
         "download.directory_upgrade": True,
         "safebrowsing.enabled": True,
