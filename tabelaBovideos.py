@@ -71,7 +71,7 @@ def inserir_dados_banco(cnpj, tabela,logging):
         
         faixet = None 
 
-        if sexo == '1':
+        if sexo == '2':
             if faixetaria == "00 A 04 MESES":
                 faixet = "144094"
             elif faixetaria == "05 A 12 MESES":
@@ -83,7 +83,7 @@ def inserir_dados_banco(cnpj, tabela,logging):
             elif faixetaria == "ACIMA DE 36 MESES":
                 faixet = "000041"
                 
-        elif sexo == '2':
+        elif sexo == '1':
             if faixetaria == "00 A 04 MESES":
                 faixet = "144095"
             elif faixetaria == "05 A 12 MESES":

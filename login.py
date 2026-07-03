@@ -50,7 +50,7 @@ def login_indea(aglomerado,login_usuario,senha_usuario, driver, row, WebDriverWa
             # 2. Agora sim, pega a penúltima LINHA da lista
             erro_limpo = linhas[-2]
 
-            armazenar_valor(aglomerado, erro_limpo)
+            armazenar_valor(fr"{aglomerado} - {row['Login']}", erro_limpo)
             
             login_realizado = False
 

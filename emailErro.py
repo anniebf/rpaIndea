@@ -33,6 +33,7 @@ def enviar_warning(logging):
                     <ul>
                         {linhas_erro}
                     </ul>
+                    <p style="text-align: right; font-size: 11px; color: #555555;">E-mail gerado por Python — host: 10.194.0.57. caminho: /python_bf/rpaIndea/main.py</p>
                 </body>
             </html>
             """
