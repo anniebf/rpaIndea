@@ -21,22 +21,31 @@ def enviar_warning(logging):
         destinatarios_limpos = [email.strip() for email in ALERT_RECIPIENTS]
 
         if not aglomerado_erro:
-            linhas_erro = "<li><b>Teste:</b> Nenhum erro registrado.</li>"
+            subject = "FINALIZAÇÃO DO RPA INDEA"
+            body = f"""
+                <html>
+                    <body>
+                        <p><b>NÃO FOI ENCONTRADA ERROS NO PROCESSO</b></p>
+                        <p>Todos os CNPJs foram processados com sucesso.</p>
+                        <p style="text-align: right; font-size: 11px; color: #555555;">E-mail gerado por Python — host: 10.194.0.57. caminho: /python_bf/rpaIndea/main.py</p>
+                    </body>
+                </html>
+                """
         else:
             linhas_erro = "".join([f"<li><b>{fazenda}:</b> {erro}</li>" for fazenda, erro in aglomerado_erro.items()])
-        
-        subject = "ERROS RPA INDEA"
-        body = f"""
-            <html>
-                <body>
-                    <p><b>FORAM ENCONTRADOS ERROS NO PROCESSAMENTO DE UMA OU MAIS FAZENDAS:</b></p>
-                    <ul>
-                        {linhas_erro}
-                    </ul>
-                    <p style="text-align: right; font-size: 11px; color: #555555;">E-mail gerado por Python — host: 10.194.0.57. caminho: /python_bf/rpaIndea/main.py</p>
-                </body>
-            </html>
-            """
+            
+            subject = "ERROS RPA INDEA"
+            body = f"""
+                <html>
+                    <body>
+                        <p><b>FORAM ENCONTRADOS ERROS NO PROCESSAMENTO DE UMA OU MAIS FAZENDAS:</b></p>
+                        <ul>
+                            {linhas_erro}
+                        </ul>
+                        <p style="text-align: right; font-size: 11px; color: #555555;">E-mail gerado por Python — host: 10.194.0.57. caminho: /python_bf/rpaIndea/main.py</p>
+                    </body>
+                </html>
+                """
 
         # Criando o e-mail em formato texto/html puro
         message = MIMEText(body, "html", "utf-8")
