@@ -1,3 +1,4 @@
+from email.mime.image import MIMEImage
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -13,18 +14,21 @@ ALERT_RECIPIENTS= os.getenv("ALERT_RECIPIENTS").split(",")
 
 destinatarios = ALERT_RECIPIENTS
 
+IMG_PATH = r"C:\rpaIndea\img\bf_workflow.png"
+
 aglomerado_erro = {}
 
 def enviar_warning(logging):
     try:
         # Limpa eventuais espaços nos e-mails do .env
         destinatarios_limpos = [email.strip() for email in ALERT_RECIPIENTS]
-
+        tag_imagem = '<img src="cid:logo_alerta" alt="Header" style="display:block; margin-bottom:15px;"><br>'
         if not aglomerado_erro:
             subject = "FINALIZAÇÃO DO RPA INDEA"
             body = f"""
                 <html>
                     <body>
+                        {tag_imagem}
                         <p><b>NÃO FOI ENCONTRADA ERROS NO PROCESSO</b></p>
                         <p>Todos os CNPJs foram processados com sucesso.</p>
                         <p style="text-align: right; font-size: 11px; color: #555555;">E-mail gerado por Python — host: 10.194.0.57. caminho: /python_bf/rpaIndea/main.py</p>
@@ -38,6 +42,7 @@ def enviar_warning(logging):
             body = f"""
                 <html>
                     <body>
+                        {tag_imagem}
                         <p><b>FORAM ENCONTRADOS ERROS NO PROCESSAMENTO DE UMA OU MAIS FAZENDAS:</b></p>
                         <ul>
                             {linhas_erro}
@@ -47,20 +52,33 @@ def enviar_warning(logging):
                 </html>
                 """
 
-        # Criando o e-mail em formato texto/html puro
-        message = MIMEText(body, "html", "utf-8")
+        # 1. Cria o container que permite anexar a imagem ao HTML
+        message = MIMEMultipart("related")
         message["From"] = sender_mail
         message["To"] = ", ".join(destinatarios_limpos)
         message["Subject"] = subject
 
-        # FLUXO DE CONEXÃO IDÊNTICO AO SEGUNDO SCRIPT
-        # Sem ehlo() manuais, usando as variáveis globais diretas
+        # 2. Anexa o corpo HTML ao container
+        msg_html = MIMEText(body, "html", "utf-8")
+        message.attach(msg_html)
+
+        # 3. LÃª a imagem do servidor e a anexa vinculando-a ao 'logo_alerta'
+        if os.path.exists(IMG_PATH):
+            with open(IMG_PATH, "rb") as f:
+                img_data = f.read()
+            
+            msg_image = MIMEImage(img_data)
+            msg_image.add_header("Content-ID", "<logo_alerta>")
+            msg_image.add_header("Content-Disposition", "inline", filename=os.path.basename(IMG_PATH))
+            message.attach(msg_image)
+        else:
+            logging.warning(f"Imagem nÃ£o encontrada no caminho: {IMG_PATH}")
+
+        # 4. ConexÃ£o e envio (usando o objeto 'message' atualizado)
         server = smtplib.SMTP(server_smtp, port)
         server.starttls()
         server.login(sender_mail, password)
-        
-        # O comando de envio que faltava no seu primeiro código original
-        server.sendmail(sender_mail, ALERT_RECIPIENTS, message.as_string())
+        server.sendmail(sender_mail, destinatarios_limpos, message.as_string())
         server.quit()
         
 
