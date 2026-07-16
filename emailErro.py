@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
 server_smtp= os.getenv("SMTP_HOST")
